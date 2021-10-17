@@ -1,58 +1,62 @@
 import { shaderLoader } from "../modules/shader-loader.js";
+import cube from "../modules/cube.js";
 
 const vertShader = "../shaders/basic.vert";
 const fragShader = "../shaders/basic.frag";
 
-const gl = document.getElementById("gl-canvas").getContext("webgl2");
+function initBuffers(gl) {
+  const positionBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array(cube.positions),
+    gl.STATIC_DRAW
+  );
 
-shaderLoader(gl, vertShader, fragShader)
-  .then((program) => {
-    console.log("shaders compiled", program);
-  })
-  .catch((error) => {
-    console.error(error);
-  });
+  return {
+    position: positionBuffer,
+  };
+}
 
-// prettier-ignore
-const positions = [
-  // front face
-  -1.0, -1.0, 1.0,
-  1.0, -1.0, 1.0,
-  1.0, 1.0, 1.0,
-  -1.0, 1.0, 1.0,
+async function init() {
+  const gl = document.getElementById("gl-canvas").getContext("webgl2");
+  const program = await shaderLoader(gl, vertShader, fragShader);
+  const shader = {
+    program: program,
+    // TODO: can we automate this lookup?
+    attribLocations: {
+      vertexPositions: gl.getAttribLocation(program, "a_position"),
+      vertexColor: gl.getAttribLocation(program, "a_color"),
+    },
+    uniformLocations: {
+      projectionMatrix: gl.getUniformLocation(program, "u_projection"),
+      modelViewMatrix: gl.getUniformLocation(program, "u_modelView"),
+    },
+  };
 
-  // back face
-  -1.0, -1.0, -1.0,
-  -1.0, 1.0, -1.0,
-  1.0, 1.0, -1.0,
-  1.0, -1.0, -1.0,
+  console.log(shader);
 
-  // top face
-  -1.0, 1.0, -1.0,
-  -1.0, 1.0, 1.0,
-  1.0, 1.0, 1.0,
-  1.0, 1.0, -1.0,
+  const buffers = initBuffers(gl);
 
-  // bottom face
-  -1.0, -1.0, -1.0,
-  1.0, -1.0, -1.0,
-  1.0, -1.0, 1.0,
-  -1.0, -1.0, 1.0,
+  console.log(buffers);
 
-  // right face
-  1.0, -1.0, -1.0,
-  1.0, 1.0, -1.0,
-  1.0, 1.0, 1.0,
-  1.0, -1.0, 1.0,
+  function render(time) {
+    time *= 0.001; // ms -> seconds
 
-  // left face
-  -1.0, -1.0, -1.0,
-  -1.0, -1.0, 1.0,
-  -1.0, 1.0, 1.0,
-  -1.0, 1.0, -1.0,
-];
+    draw(gl, shader, buffers, time);
 
-const numComponents = 3;
-const positionBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+    requestAnimationFrame(render);
+  }
+  requestAnimationFrame(render);
+}
+
+function draw(gl, shader, buffers, time) {
+  gl.clearColor(0, 0, 0, 1);
+  gl.clearDepth(1.0);
+  gl.enable(gl.DEPTH_TEST);
+  gl.depthFunc(gl.LEQUAL);
+
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+}
+
+init();
