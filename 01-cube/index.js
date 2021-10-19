@@ -1,53 +1,56 @@
 import { shaderLoader } from "../modules/shader-loader.js";
-import cube from "../modules/cube.js";
+// import cube from "../modules/cube.js";
 
 const vertShader = "../shaders/basic.vert";
 const fragShader = "../shaders/basic.frag";
 
-function initBuffers(gl) {
-  const positionBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  gl.bufferData(
-    gl.ARRAY_BUFFER,
-    new Float32Array(cube.positions),
-    gl.STATIC_DRAW
-  );
+// function initBuffers(gl) {
+//   const positionBuffer = gl.createBuffer();
+//   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+//   gl.bufferData(
+//     gl.ARRAY_BUFFER,
+//     new Float32Array(cube.positions),
+//     gl.STATIC_DRAW
+//   );
 
-  return {
-    position: positionBuffer,
-  };
-}
+//   return {
+//     position: positionBuffer,
+//   };
+// }
 
 async function init() {
   const gl = document.getElementById("gl-canvas").getContext("webgl2");
   const program = await shaderLoader(gl, vertShader, fragShader);
-  const shader = {
-    program: program,
-    // TODO: can we automate this lookup?
-    attribLocations: {
-      vertexPositions: gl.getAttribLocation(program, "a_position"),
-      vertexColor: gl.getAttribLocation(program, "a_color"),
-    },
-    uniformLocations: {
-      projectionMatrix: gl.getUniformLocation(program, "u_projection"),
-      modelViewMatrix: gl.getUniformLocation(program, "u_modelView"),
-    },
-  };
 
-  console.log(shader);
+  console.log(program);
 
-  const buffers = initBuffers(gl);
+  // const shader = {
+  //   program: program,
+  //   // TODO: can we automate this lookup?
+  //   attribLocations: {
+  //     vertexPositions: gl.getAttribLocation(program, "a_position"),
+  //     vertexColor: gl.getAttribLocation(program, "a_color"),
+  //   },
+  //   uniformLocations: {
+  //     projectionMatrix: gl.getUniformLocation(program, "u_projection"),
+  //     modelViewMatrix: gl.getUniformLocation(program, "u_modelView"),
+  //   },
+  // };
 
-  console.log(buffers);
+  // console.log(shader);
 
-  function render(time) {
-    time *= 0.001; // ms -> seconds
+  // const buffers = initBuffers(gl);
 
-    draw(gl, shader, buffers, time);
+  // console.log(buffers);
 
-    requestAnimationFrame(render);
-  }
-  requestAnimationFrame(render);
+  // function render(time) {
+  //   time *= 0.001; // ms -> seconds
+
+  //   draw(gl, shader, buffers, time);
+
+  //   requestAnimationFrame(render);
+  // }
+  // requestAnimationFrame(render);
 }
 
 function draw(gl, shader, buffers, time) {
