@@ -2,7 +2,7 @@
 Major portions from Mozilla docs:
 https://github.com/mdn/webgl-examples/blob/gh-pages/tutorial/sample5/webgl-demo.js 
 */
-import { createProgramFromSources } from "./twgl-full.module.js";
+import { createProgramInfo } from "./twgl-full.module.js";
 
 function loadShader(gl, type, source) {
   const shader = gl.createShader(type);
@@ -39,7 +39,7 @@ function shaderLoader(gl, vertPath, fragPath) {
     .then((responses) => Promise.all(responses.map((r) => r.text())))
     .then((sources) => {
       // return initShaderProgram(gl, sources[0], sources[1]);
-      return createProgramFromSources(gl, [sources[0], sources[1]]);
+      return createProgramInfo(gl, [sources[0], sources[1]]);
     });
 }
 
