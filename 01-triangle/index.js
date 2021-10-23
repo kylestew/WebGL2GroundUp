@@ -1,7 +1,7 @@
 import { shaderLoader } from "../modules/shader-loader.js";
 import {
-  createBufferInfoFromArrays,
   m4,
+  createBufferInfoFromArrays,
   resizeCanvasToDisplaySize,
   setBuffersAndAttributes,
   setUniforms,
@@ -47,9 +47,11 @@ async function init() {
   const programInfo = await shaderLoader(gl, vertShader, fragShader);
 
   const triangleObj = {
-    model: m4.identity(),
+    scale_mat: m4.identity(),
     buffers: createTriangleObj(gl),
   };
+
+  console.log(triangleObj);
 
   function render(time) {
     time *= 0.001; // ms -> seconds
@@ -58,13 +60,15 @@ async function init() {
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     gl.enable(gl.DEPTH_TEST);
-    gl.enable(gl.CULL_FACE);
+    // gl.enable(gl.CULL_FACE);
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     const uniforms = {};
 
-    // update and draw cube
+    // scale
+    const scale = Math.sin(time);
+    triangleObj.scale_mat = uniformScaleMat(triangleObj.scale_mat, scale);
     draw(gl, triangleObj, programInfo, uniforms);
 
     requestAnimationFrame(render);
@@ -77,9 +81,9 @@ function draw(gl, object, programInfo, uniforms) {
 
   setBuffersAndAttributes(gl, programInfo, object.buffers);
 
-  printMatrix(object.model);
+  printMatrix(object.scale_mat);
 
-  uniforms.u_model = object.model;
+  uniforms.u_scale = object.scale_mat;
   setUniforms(programInfo, uniforms);
 
   gl.drawElements(
@@ -91,6 +95,31 @@ function draw(gl, object, programInfo, uniforms) {
 }
 
 init();
+
+function uniformScaleMat(mat, scale) {
+  var dst = new Float32Array(16);
+  dst[0] = scale;
+  dst[1] = 0;
+  dst[2] = 0;
+  dst[3] = 0;
+
+  dst[4] = 0;
+  dst[5] = scale;
+  dst[6] = 0;
+  dst[7] = 0;
+
+  dst[8] = 0;
+  dst[9] = 0;
+  dst[10] = scale;
+  dst[11] = 0;
+
+  dst[12] = 0;
+  dst[13] = 0;
+  dst[14] = 0;
+  dst[15] = 1;
+
+  return dst;
+}
 
 function printMatrix(mat) {
   console.log(mat[0], mat[4], mat[8], mat[12]);

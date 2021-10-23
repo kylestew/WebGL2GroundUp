@@ -3,14 +3,12 @@
 in vec4 position;
 in vec4 color;
 
-uniform mat4 u_model;
-uniform mat4 u_view;
-uniform mat4 u_projection;
+uniform mat4 u_scale;
 
 out vec4 v_color;
 
 void main() {
-    // gl_Position = u_projection * u_view * u_model * position;
-    gl_Position = position;
+    // apply scaling transform via matrix-vector mult
+    gl_Position = u_scale * position;
     v_color = color;
 }
