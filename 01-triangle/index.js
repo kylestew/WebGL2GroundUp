@@ -1,6 +1,6 @@
 import { shaderLoader } from "../modules/shader-loader.js";
+import mat from "../modules/matrix.js";
 import {
-  m4,
   createBufferInfoFromArrays,
   resizeCanvasToDisplaySize,
   setBuffersAndAttributes,
@@ -47,11 +47,11 @@ async function init() {
   const programInfo = await shaderLoader(gl, vertShader, fragShader);
 
   const triangleObj = {
-    scale_mat: m4.identity(),
+    transform_mat: mat.identity(),
     buffers: createTriangleObj(gl),
   };
 
-  console.log(triangleObj);
+  mat.print(triangleObj.transform_mat);
 
   function render(time) {
     time *= 0.001; // ms -> seconds
@@ -66,9 +66,18 @@ async function init() {
 
     const uniforms = {};
 
+    // upate transformation
+    var m = triangleObj.transform_mat;
+    const t = Math.sin(time);
     // scale
-    const scale = Math.sin(time);
-    triangleObj.scale_mat = uniformScaleMat(triangleObj.scale_mat, scale);
+    m = mat.uniformScale(m, t);
+    // triangleObj.scale_mat = uniformScaleMat(triangleObj.scale_mat, scale);
+
+    mat.print(m);
+
+    triangleObj.transform_mat = m;
+
+    // draw
     draw(gl, triangleObj, programInfo, uniforms);
 
     requestAnimationFrame(render);
@@ -81,9 +90,7 @@ function draw(gl, object, programInfo, uniforms) {
 
   setBuffersAndAttributes(gl, programInfo, object.buffers);
 
-  printMatrix(object.scale_mat);
-
-  uniforms.u_scale = object.scale_mat;
+  uniforms.u_transform = object.transform_mat;
   setUniforms(programInfo, uniforms);
 
   gl.drawElements(
@@ -95,35 +102,3 @@ function draw(gl, object, programInfo, uniforms) {
 }
 
 init();
-
-function uniformScaleMat(mat, scale) {
-  var dst = new Float32Array(16);
-  dst[0] = scale;
-  dst[1] = 0;
-  dst[2] = 0;
-  dst[3] = 0;
-
-  dst[4] = 0;
-  dst[5] = scale;
-  dst[6] = 0;
-  dst[7] = 0;
-
-  dst[8] = 0;
-  dst[9] = 0;
-  dst[10] = scale;
-  dst[11] = 0;
-
-  dst[12] = 0;
-  dst[13] = 0;
-  dst[14] = 0;
-  dst[15] = 1;
-
-  return dst;
-}
-
-function printMatrix(mat) {
-  console.log(mat[0], mat[4], mat[8], mat[12]);
-  console.log(mat[1], mat[5], mat[9], mat[13]);
-  console.log(mat[2], mat[6], mat[10], mat[14]);
-  console.log(mat[3], mat[7], mat[11], mat[15]);
-}
