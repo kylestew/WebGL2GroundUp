@@ -67,14 +67,13 @@ async function init() {
     const uniforms = {};
 
     // upate transformation
-    var m = triangleObj.transform_mat;
+    var m = mat.identity();
     const t = Math.sin(time);
+    const s = Math.cos(time);
     // scale
     m = mat.uniformScale(m, t);
-    // triangleObj.scale_mat = uniformScaleMat(triangleObj.scale_mat, scale);
-
-    mat.print(m);
-
+    m = mat.translate(m, [s / 2, s * 0.2, 0]);
+    // mat.print(m);
     triangleObj.transform_mat = m;
 
     // draw
