@@ -82,18 +82,6 @@ function multiply(a, b) {
   return dst;
 }
 
-function multVectByMat(v, m) {
-  var dst = new Float32Array(16);
-
-  const v0 = v[0];
-  const v1 = v[1];
-  const v2 = v[2];
-
-  // TODO:...
-
-  return dst;
-}
-
 // prettier-ignore
 function createTranslation(v) {
   var dst = identity();
