@@ -1,5 +1,5 @@
 import { shaderLoader } from "../modules/shader-loader.js";
-import cube from "../modules/cube.js";
+import { createCube } from "../modules/primitives.js";
 import {
   createBufferInfoFromArrays,
   resizeCanvasToDisplaySize,
@@ -15,9 +15,9 @@ async function init() {
   const gl = document.getElementById("gl-canvas").getContext("webgl2");
   const programInfo = await shaderLoader(gl, vertShader, fragShader);
 
-  const triangleObj = {
+  const modelObj = {
     model: m4.identity(),
-    buffers: createBufferInfoFromArrays(gl, cube),
+    buffers: createBufferInfoFromArrays(gl, createCube(0.5)),
   };
 
   function render(time) {
@@ -37,11 +37,11 @@ async function init() {
     m = m4.rotateZ(m, time);
     m = m4.rotateY(m, time * -0.6);
     m = m4.rotateX(m, time * 0.4);
-    triangleObj.model = m;
+    modelObj.model = m;
 
     // draw
     const uniforms = {};
-    draw(gl, triangleObj, programInfo, uniforms);
+    draw(gl, modelObj, programInfo, uniforms);
 
     requestAnimationFrame(render);
   }

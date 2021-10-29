@@ -1,5 +1,5 @@
 import { shaderLoader } from "../modules/shader-loader.js";
-import { createCube } from "../modules/primitives.js";
+import { createCube, createSphere } from "../modules/primitives.js";
 import {
   createBufferInfoFromArrays,
   resizeCanvasToDisplaySize,
@@ -8,46 +8,22 @@ import {
   m4,
 } from "../modules/twgl-full.module.js";
 
-const vertShader = "../shaders/perspective.vert";
-const fragShader = "../shaders/basic.frag";
-
-function makeCube() {
-  const cube = createCube();
-
-  // prettier-ignore
-  const faceColors = [
-    [1.0,  1.0,  1.0,  1.0],    // Front face: white
-    [1.0,  0.0,  0.0,  1.0],    // Back face: red
-    [0.0,  1.0,  0.0,  1.0],    // Top face: green
-    [0.0,  0.0,  1.0,  1.0],    // Bottom face: blue
-    [1.0,  1.0,  0.0,  1.0],    // Right face: yellow
-    [1.0,  0.0,  1.0,  1.0],    // Left face: purple
-  ];
-
-  function makeVertexColors() {
-    var colors = [];
-    for (var j = 0; j < faceColors.length; ++j) {
-      const c = faceColors[j];
-      colors = colors.concat(c, c, c, c);
-    }
-    return colors;
-  }
-
-  cube.color = makeVertexColors();
-
-  return cube;
-}
+const vertShader = "../shaders/lambert.vert";
+const fragShader = "../shaders/lambert.frag";
 
 async function init() {
   const gl = document.getElementById("gl-canvas").getContext("webgl2");
   const programInfo = await shaderLoader(gl, vertShader, fragShader);
 
-  const modelObj = {
+  const cubeObj = {
     model: m4.identity(),
-    buffers: createBufferInfoFromArrays(gl, makeCube()),
+    buffers: createBufferInfoFromArrays(gl, createCube(2)),
   };
 
-  console.log(modelObj);
+  const sphereObj = {
+    model: m4.identity(),
+    buffers: createBufferInfoFromArrays(gl, createSphere(1, 24, 16)),
+  };
 
   function render(time) {
     time *= 0.001; // ms -> seconds
@@ -62,17 +38,7 @@ async function init() {
 
     const uniforms = {};
 
-    // upate model transform
-    var m = m4.identity();
-    m = m4.scale(m, [2.0, 2.0, 2.0]);
-    m = m4.rotateZ(m, time);
-    m = m4.rotateY(m, time * -0.6);
-    m = m4.rotateX(m, time * 0.4);
-    modelObj.model = m;
-    uniforms.u_model = modelObj.model;
-
     // update camera
-    // TODO: I don't really understand this
     const fov = (45 * Math.PI) / 180;
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
     const zNear = 0.1;
@@ -80,15 +46,34 @@ async function init() {
     const projectionMatrix = m4.perspective(fov, aspect, zNear, zFar);
     uniforms.u_projection = projectionMatrix;
 
-    const eye = [1, 4, -6];
+    const eye = [0, 4, -6];
     const target = [0, 0, 0];
     const up = [0, 1, 0];
     const camera = m4.lookAt(eye, target, up);
     const view = m4.inverse(camera);
     uniforms.u_view = view;
 
-    // draw
-    draw(gl, modelObj, programInfo, uniforms);
+    // update and draw cube
+    var m = m4.identity();
+    m = m4.translate(m, [2.0, 0, 0]);
+    m = m4.scale(m, [0.8, 0.8, 0.8]);
+    m = m4.rotateZ(m, time);
+    m = m4.rotateY(m, time * -0.6);
+    m = m4.rotateX(m, time * 0.4);
+    cubeObj.model = m;
+    uniforms.u_model = cubeObj.model;
+    draw(gl, cubeObj, programInfo, uniforms);
+
+    // update and draw sphere
+    var m = m4.identity();
+    m = m4.translate(m, [-2, 0, 0]);
+    m = m4.scale(m, [1.2, 1.2, 1.2]);
+    m = m4.rotateZ(m, time);
+    m = m4.rotateY(m, time * -0.6);
+    m = m4.rotateX(m, time * 0.4);
+    sphereObj.model = m;
+    uniforms.u_model = sphereObj.model;
+    draw(gl, sphereObj, programInfo, uniforms);
 
     requestAnimationFrame(render);
   }
