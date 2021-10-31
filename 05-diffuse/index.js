@@ -39,19 +39,19 @@ async function init() {
     const uniforms = {};
 
     // update camera
-    const fov = (45 * Math.PI) / 180;
-    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-    const zNear = 0.1;
-    const zFar = 100.0;
-    const projectionMatrix = m4.perspective(fov, aspect, zNear, zFar);
-    uniforms.u_projection = projectionMatrix;
-
     const eye = [0, 4, -6];
     const target = [0, 0, 0];
     const up = [0, 1, 0];
     const camera = m4.lookAt(eye, target, up);
     const view = m4.inverse(camera);
     uniforms.u_view = view;
+
+    const fov = (45 * Math.PI) / 180;
+    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    const zNear = 0.1;
+    const zFar = 100.0;
+    const projectionMatrix = m4.perspective(fov, aspect, zNear, zFar);
+    uniforms.u_projection = projectionMatrix;
 
     // update and draw cube
     var m = m4.identity();

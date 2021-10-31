@@ -11,43 +11,13 @@ import {
 const vertShader = "../shaders/perspective.vert";
 const fragShader = "../shaders/basic.frag";
 
-function makeCube() {
-  const cube = createCube();
-
-  // prettier-ignore
-  const faceColors = [
-    [1.0,  1.0,  1.0,  1.0],    // Front face: white
-    [1.0,  0.0,  0.0,  1.0],    // Back face: red
-    [0.0,  1.0,  0.0,  1.0],    // Top face: green
-    [0.0,  0.0,  1.0,  1.0],    // Bottom face: blue
-    [1.0,  1.0,  0.0,  1.0],    // Right face: yellow
-    [1.0,  0.0,  1.0,  1.0],    // Left face: purple
-  ];
-
-  function makeVertexColors() {
-    var colors = [];
-    for (var j = 0; j < faceColors.length; ++j) {
-      const c = faceColors[j];
-      colors = colors.concat(c, c, c, c);
-    }
-    return colors;
-  }
-
-  cube.color = makeVertexColors();
-
-  return cube;
-}
-
 async function init() {
   const gl = document.getElementById("gl-canvas").getContext("webgl2");
   const programInfo = await shaderLoader(gl, vertShader, fragShader);
 
   const modelObj = {
-    model: m4.identity(),
-    buffers: createBufferInfoFromArrays(gl, makeCube()),
+    buffers: createBufferInfoFromArrays(gl, createCube()),
   };
-
-  console.log(modelObj);
 
   function render(time) {
     time *= 0.001; // ms -> seconds
@@ -62,30 +32,28 @@ async function init() {
 
     const uniforms = {};
 
-    // upate model transform
+    // Model Matrix: Model Space -> World Space
+    // rotate cube around its axis over time
     var m = m4.identity();
-    m = m4.scale(m, [2.0, 2.0, 2.0]);
-    m = m4.rotateZ(m, time);
-    m = m4.rotateY(m, time * -0.6);
-    m = m4.rotateX(m, time * 0.4);
-    modelObj.model = m;
-    uniforms.u_model = modelObj.model;
+    m = m4.scale(m, [0.5, 0.5, 0.5]);
+    m = m4.rotateX(m, (Math.sin(time * 0.25) * Math.PI) / 4.0);
+    m = m4.rotateY(m, time * 0.5);
+    uniforms.u_model = m;
 
-    // update camera
-    // TODO: I don't really understand this
+    // View Matrix: World Space -> View Space
+    const eye = [0, 0, 2];
+    const camera = m4.translate(m4.identity(), eye);
+    const view = m4.inverse(camera);
+    uniforms.u_view = view;
+
+    // Projection Matrix: View Space -> Clip Space (device normalized coords)
+    // const fov = Math.PI * 0.25;
     const fov = (45 * Math.PI) / 180;
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
     const zNear = 0.1;
-    const zFar = 100.0;
-    const projectionMatrix = m4.perspective(fov, aspect, zNear, zFar);
-    uniforms.u_projection = projectionMatrix;
-
-    const eye = [1, 4, -6];
-    const target = [0, 0, 0];
-    const up = [0, 1, 0];
-    const camera = m4.lookAt(eye, target, up);
-    const view = m4.inverse(camera);
-    uniforms.u_view = view;
+    const zFar = 100;
+    uniforms.u_projection = m4.perspective(fov, aspect, zNear, zFar);
+    // mat.print(uniforms.u_projection);
 
     // draw
     draw(gl, modelObj, programInfo, uniforms);
