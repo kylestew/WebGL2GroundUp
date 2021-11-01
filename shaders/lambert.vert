@@ -7,9 +7,13 @@ uniform mat4 u_model;
 uniform mat4 u_view;
 uniform mat4 u_projection;
 
-out vec4 v_color;
+out vec3 v_pos;
+out vec3 v_normal;
+out mat3 v_normalMatrix;
 
 void main() {
     gl_Position = u_projection * u_view * u_model * position;
-    v_color = vec4(0.5 * (normal + 1.0), 1.0);
+    v_pos = vec3(u_model * position);
+    v_normal = normal;
+    v_normalMatrix = transpose(inverse(mat3(u_model)));
 }

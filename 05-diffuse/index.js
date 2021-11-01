@@ -6,6 +6,7 @@ import {
   setBuffersAndAttributes,
   setUniforms,
   m4,
+  v3,
 } from "../modules/twgl-full.module.js";
 
 const vertShader = "../shaders/lambert.vert";
@@ -39,7 +40,7 @@ async function init() {
     const uniforms = {};
 
     // update camera
-    const eye = [0, 4, -6];
+    const eye = [0, 4, -8];
     const target = [0, 0, 0];
     const up = [0, 1, 0];
     const camera = m4.lookAt(eye, target, up);
@@ -53,6 +54,15 @@ async function init() {
     const projectionMatrix = m4.perspective(fov, aspect, zNear, zFar);
     uniforms.u_projection = projectionMatrix;
 
+    // update lights
+    uniforms.u_ambientColor = v3.create(1, 1, 1);
+    uniforms.u_ambientIntensity = 0.3;
+
+    uniforms.u_diffuseColor = v3.create(1, 1, 1);
+    uniforms.u_diffuseIntensity = 0.8;
+
+    uniforms.u_lightPosition = [0, 10 * Math.sin(time * 0.5), 0];
+
     // update and draw cube
     var m = m4.identity();
     m = m4.translate(m, [2.0, 0, 0]);
@@ -62,6 +72,7 @@ async function init() {
     m = m4.rotateX(m, time * 0.4);
     cubeObj.model = m;
     uniforms.u_model = cubeObj.model;
+    uniforms.u_materialColor = v3.create(0.3, 0.9, 0.3);
     draw(gl, cubeObj, programInfo, uniforms);
 
     // update and draw sphere
@@ -73,6 +84,7 @@ async function init() {
     m = m4.rotateX(m, time * 0.4);
     sphereObj.model = m;
     uniforms.u_model = sphereObj.model;
+    uniforms.u_materialColor = v3.create(1, 0.3, 0);
     draw(gl, sphereObj, programInfo, uniforms);
 
     requestAnimationFrame(render);
