@@ -1,7 +1,6 @@
 import { shaderLoader } from "../modules/shader-loader.js";
-import { createCube, createSphere } from "../modules/primitives.js";
 import {
-  createBufferInfoFromArrays,
+  primitives,
   resizeCanvasToDisplaySize,
   setBuffersAndAttributes,
   setUniforms,
@@ -9,21 +8,16 @@ import {
   v3,
 } from "../modules/twgl-full.module.js";
 
-const vertShader = "../shaders/diffuse.vert";
-const fragShader = "../shaders/diffuse.frag";
+const vertShader = "../shaders/phong.vert";
+const fragShader = "../shaders/phong.frag";
 
 async function init() {
   const gl = document.getElementById("gl-canvas").getContext("webgl2");
   const programInfo = await shaderLoader(gl, vertShader, fragShader);
 
-  const cubeObj = {
-    model: m4.identity(),
-    buffers: createBufferInfoFromArrays(gl, createCube(2)),
-  };
-
-  const sphereObj = {
-    model: m4.identity(),
-    buffers: createBufferInfoFromArrays(gl, createSphere(1, 24, 16)),
+  const obj = {
+    materialColor: v3.create(0.9, 0.3, 0.2),
+    buffers: primitives.createTorusBufferInfo(gl, 2.0, 0.5, 128, 64),
   };
 
   function render(time) {
@@ -33,7 +27,7 @@ async function init() {
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     gl.enable(gl.DEPTH_TEST);
-    gl.enable(gl.CULL_FACE);
+    // gl.enable(gl.CULL_FACE);
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -45,47 +39,42 @@ async function init() {
     const up = [0, 1, 0];
     const camera = m4.lookAt(eye, target, up);
     const view = m4.inverse(camera);
-    uniforms.u_view = view;
+    uniforms.uView = view;
 
     const fov = (45 * Math.PI) / 180;
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
     const zNear = 0.1;
     const zFar = 100.0;
     const projectionMatrix = m4.perspective(fov, aspect, zNear, zFar);
-    uniforms.u_projection = projectionMatrix;
+    uniforms.uProjection = projectionMatrix;
 
     // update lights
-    uniforms.u_ambientColor = v3.create(1, 1, 1);
-    uniforms.u_ambientIntensity = 0.3;
+    uniforms.uAmbientColor = v3.create(0.0, 0.0, 0.8);
+    uniforms.uAmbientIntensity = 0.5;
 
-    uniforms.u_diffuseColor = v3.create(1, 1, 1);
-    uniforms.u_diffuseIntensity = 0.8;
+    uniforms.uDiffuseColor = v3.create(1, 0.8, 0.8);
+    uniforms.uDiffuseIntensity = 1.2;
 
-    uniforms.u_lightPosition = [0, 10 * Math.sin(time * 0.5), 0];
+    uniforms.uSpecularColor = v3.create(1.0, 1.0, 1.0);
+    uniforms.uSpecularIntensity = 0.7;
 
-    // update and draw cube
+    uniforms.uLightPosition = [0, 10 * Math.sin(time * 0.5), 0];
+
+    // draw a torus
     var m = m4.identity();
-    m = m4.translate(m, [2.0, 0, 0]);
-    m = m4.scale(m, [0.8, 0.8, 0.8]);
-    m = m4.rotateZ(m, time);
-    m = m4.rotateY(m, time * -0.6);
-    m = m4.rotateX(m, time * 0.4);
-    cubeObj.model = m;
-    uniforms.u_model = cubeObj.model;
-    uniforms.u_materialColor = v3.create(0.3, 0.9, 0.3);
-    draw(gl, cubeObj, programInfo, uniforms);
+    m = m4.rotateX(m, time * -0.333);
+    m = m4.rotateZ(m, time * 0.333);
+    uniforms.uModel = m;
+    uniforms.uMaterialColor = obj.materialColor;
+    draw(gl, obj, programInfo, uniforms);
 
-    // update and draw sphere
+    // draw a 2nd torus
     var m = m4.identity();
-    m = m4.translate(m, [-2, 0, 0]);
-    m = m4.scale(m, [1.2, 1.2, 1.2]);
-    m = m4.rotateZ(m, time);
-    m = m4.rotateY(m, time * -0.6);
-    m = m4.rotateX(m, time * 0.4);
-    sphereObj.model = m;
-    uniforms.u_model = sphereObj.model;
-    uniforms.u_materialColor = v3.create(1, 0.3, 0);
-    draw(gl, sphereObj, programInfo, uniforms);
+    m = m4.rotateX(m, time * 0.333);
+    // m = m4.rotateX(m, time * -0.4);
+    uniforms.uModel = m;
+    uniforms.uMaterialColor = obj.materialColor;
+    draw(gl, obj, programInfo, uniforms);
 
     requestAnimationFrame(render);
   }
