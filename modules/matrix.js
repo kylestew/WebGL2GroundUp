@@ -133,6 +133,39 @@ function uniformScale(m, s) {
   return scale(m, [s, s, s]);
 }
 
+// prettier-ignore
+function createRotation(angle, axis) {
+    const x = axis[0], y = axis[1], z = axis[2];
+    const n = Math.sqrt(x * x + y * y + z * z);
+    const xN = x / n, yN = y / n, zN = z / n;
+    const sinA = Math.sin(angle), cosA = Math.cos(angle);
+    const cosDiff = 1 - cosA;
+
+    // Rotation matrix components
+    let rotMat = [
+        cosA + cosDiff * xN * xN,
+        cosDiff * xN * yN - zN * sinA,
+        cosDiff * xN * zN + yN * sinA,
+        0,
+        cosDiff * yN * xN + zN * sinA,
+        cosA + cosDiff * yN * yN,
+        cosDiff * yN * zN - xN * sinA,
+        0,
+        cosDiff * zN * xN - yN * sinA,
+        cosDiff * zN * yN + xN * sinA,
+        cosA + cosDiff * zN * zN,
+        0,
+        0, 0, 0, 1
+    ];
+
+    return rotMat;
+}
+
+function rotate(m, angleInRadians, axis) {
+  const mR = createRotation(angleInRadians, axis);
+  return multiply(mR, m);
+}
+
 function print(mat) {
   const prec = 2;
   console.log("=======================");
@@ -176,6 +209,7 @@ const mat = {
   translate,
   scale,
   uniformScale,
+  rotate,
   print,
 };
 export default mat;

@@ -1,14 +1,21 @@
-import { shaderLoader } from "../modules/shader-loader.js";
-import mat from "../modules/matrix.js";
-import {
-  createBufferInfoFromArrays,
-  resizeCanvasToDisplaySize,
-  setBuffersAndAttributes,
-  setUniforms,
-} from "../modules/twgl-full.module.js";
+// import { shaderLoader } from "../modules/shader-loader.js";
+// import mat from "../modules/matrix.js";
+// import {
+//   createBufferInfoFromArrays,
+//   resizeCanvasToDisplaySize,
+//   setBuffersAndAttributes,
+//   setUniforms,
+// } from "../modules/twgl-full.module.js";
 
-const vertShader = "../shaders/basic.vert";
-const fragShader = "../shaders/basic.frag";
+/*
+ == WebGL2 from the ground up - no magic
+
+ Everything needed to render and rotate a 2D triangle exists in this file (and the browser libs)
+*/
+
+/*
+const vertShader = "../shaders/basic-2d.vert";
+const fragShader = "../shaders/basic-2d.frag";
 
 //prettier-ignore
 function createTriangleObj(gl) {
@@ -70,9 +77,13 @@ async function init() {
     var m = mat.identity();
     const t = Math.sin(time);
     const s = Math.cos(time);
-    // scale
-    m = mat.uniformScale(m, t);
-    m = mat.translate(m, [s / 2, s * 0.2, 0]);
+
+    m = mat.rotate(m, time, [0, 0, 1]); // 2D rotation
+
+    // // scale
+    // m = mat.uniformScale(m, t);
+    // m = mat.translate(m, [s / 2, s * 0.2, 0]);
+    // rotate
     // mat.print(m);
     triangleObj.transform_mat = m;
 
@@ -101,3 +112,5 @@ function draw(gl, object, programInfo, uniforms) {
 }
 
 init();
+
+i*/
