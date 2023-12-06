@@ -68,8 +68,8 @@ function createCube(size) {
   }
 
   return {
-    aPos: positions.flat(),
-    aNormal: normals.flat(),
+    position: positions.flat(),
+    normal: normals.flat(),
     indices: indices,
   };
 }
