@@ -1,11 +1,16 @@
-# WebGL Studies
+# WebGL2 From the Ground Up
 
-A series of learning projects built from the ground up with no off the shelf parts.
+A series of WebGL learning projects built from the ground up with no NPM packages, only the libraries included in the browser. Its amazing what browser comes with these days!
 
-Its amazing what browser come with these days!
 
-## ES6 Modules
+## 01-Triangle
 
-Used to build this project without any sort of heavy tooling.
+> No includes, all code required to render included in the `index.js` file!
 
-https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
+![01-triangle](docs/01-triangle.png)
+
+
+
+## Resources
+
+[webgl2fundamentals.org](https://webgl2fundamentals.org/)
