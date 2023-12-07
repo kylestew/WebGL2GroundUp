@@ -13,7 +13,7 @@ uniform mat2 u_model;
 out vec4 v_color;
 
 void main() {
-  gl_Position = vec4(a_position, 0, 1);
+  gl_Position = vec4(u_model * a_position, 0.0, 1.0);
   v_color = a_color;
 }
 `;
@@ -136,7 +136,6 @@ async function init() {
 
   // position attribute layout
   const positionAttributeLocation = gl.getAttribLocation(program, "a_position"); // vec2
-  console.log(positionAttributeLocation);
   gl.enableVertexAttribArray(positionAttributeLocation);
   gl.vertexAttribPointer(
     positionAttributeLocation,
@@ -149,7 +148,6 @@ async function init() {
 
   // color attribute layout
   const colorAttributeLocation = gl.getAttribLocation(program, "a_color"); // vec4
-  console.log(colorAttributeLocation);
   gl.enableVertexAttribArray(colorAttributeLocation);
   gl.vertexAttribPointer(
     colorAttributeLocation,
@@ -160,21 +158,16 @@ async function init() {
     colorOffset
   );
 
-  //....
-  // get uniform locations
+  // get uniform location for our model transform
   const modelUniformLocation = gl.getUniformLocation(program, "u_model"); // mat2
-  // TODO: setup mat2 uniform
-  //....
-
-  // size gl drawingbuffer to canvas size
-  resizeCanvasToDisplaySize(gl.canvas);
-
-  // help GL with clip space to screen space conversion
-  // NOTE: not aspect aware
-  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
   function render(now) {
     const time = now * 0.001; // ms -> seconds
+
+    // size gl drawingbuffer to canvas size
+    resizeCanvasToDisplaySize(gl.canvas);
+    // NOTE: not aspect aware - wait until we have a camera
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     // clear the canvas
     gl.clearColor(0, 0, 0, 1);
@@ -187,21 +180,14 @@ async function init() {
     gl.bindVertexArray(vao);
 
     // update model transform uniform
-    let rotVector = [
-      [1, 0],
-      [0, 1],
-    ];
-    /*
-    function rotateVec2(v, theta) {
+    const theta = time;
     const cosTheta = Math.cos(theta);
     const sinTheta = Math.sin(theta);
-
-    return [
-        v[0] * cosTheta - v[1] * sinTheta,
-        v[0] * sinTheta + v[1] * cosTheta
+    //prettier-ignore
+    let rotVector = [
+      cosTheta, -sinTheta,
+      sinTheta, cosTheta,
     ];
-}
-*/
     gl.uniformMatrix2fv(modelUniformLocation, false, rotVector);
 
     // finally! draw something
@@ -213,39 +199,6 @@ async function init() {
     requestAnimationFrame(render);
   }
   requestAnimationFrame(render);
-
-  /*
-  const triangleObj = {
-    transform_mat: mat.identity(),
-    buffers: createTriangleObj(gl),
-  };
-
-  mat.print(triangleObj.transform_mat);
-
-  function render(time) {
-    time *= 0.001; // ms -> seconds
-
-    resizeCanvasToDisplaySize(gl.canvas);
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-    const uniforms = {};
-
-    // upate transformation
-    var m = mat.identity();
-    const t = Math.sin(time);
-    const s = Math.cos(time);
-
-    m = mat.rotate(m, time, [0, 0, 1]); // 2D rotation
-
-    // // scale
-    // m = mat.uniformScale(m, t);
-    // m = mat.translate(m, [s / 2, s * 0.2, 0]);
-    // rotate
-    // mat.print(m);
-    triangleObj.transform_mat = m;
-
-
-*/
 }
 
 init();
