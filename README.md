@@ -15,7 +15,11 @@ A series of WebGL learning projects built from the ground up with no NPM package
 
 ![01-triangle](docs/01-triangle.png)
 
+## 03-Cube
 
+> Creates a 3D cube spinning in space using matrix transformations, adds correct transforms to take geometry from model space to clips space.
+
+![03-cube](docs/03-cube.png)
 
 ## Resources
 
