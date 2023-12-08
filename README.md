@@ -9,6 +9,12 @@ A series of WebGL learning projects built from the ground up with no NPM package
 
 ![01-triangle](docs/01-triangle.png)
 
+## 02-Triangle-Magic
+
+> 01-Triangle that refactors the boilerplate into shared modules
+
+![01-triangle](docs/01-triangle.png)
+
 
 
 ## Resources
