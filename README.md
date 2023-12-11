@@ -21,6 +21,13 @@ A series of WebGL learning projects built from the ground up with no NPM package
 
 ![03-cube](docs/03-cube.png)
 
+
+### TODO
+
+Current progress:
+
+...
+
 ## Resources
 
 [webgl2fundamentals.org](https://webgl2fundamentals.org/)

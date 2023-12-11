@@ -8,18 +8,18 @@ import {
   createVAOFromArrays,
 } from "../modules/wgl-util.js";
 import resizeCanvas from "../modules/canvas-resize.js";
-import { m2 } from "../modules/matrix.js";
+import { m3 } from "../modules/matrix.js";
 
 const vertexShaderSource = /* glsl */ `#version 300 es
 in vec2 a_position;
 in vec4 a_color;
 
-uniform mat2 u_model;
+uniform mat3 u_model;
 
 out vec4 v_color;
 
 void main() {
-  gl_Position = vec4(u_model * a_position, 0.0, 1.0);
+  gl_Position = vec4(u_model * vec3(a_position, 1.0), 1.0);
   v_color = a_color;
 }
 `;
@@ -56,8 +56,9 @@ async function init() {
   const positions = [
     0.0, 0.0,
     0.0, 0.5,
-    0.7, 0.0
+    0.75, 0.0
   ];
+  const centroid = [0.24, 0.17];
 
   // COLORs
   // prettier-ignore
@@ -90,9 +91,25 @@ async function init() {
     gl.useProgram(shaderProgram);
 
     // update model transform uniform
-    const theta = time;
-    const modelMat = m2.rotate(m2.identity(), theta);
-    gl.uniformMatrix2fv(modelUniformLocation, false, modelMat);
+    let modelMat = m3.identity();
+
+    // scale
+    modelMat = m3.scale(modelMat, Math.sin(0.333 * time), Math.sin(0.2 * time));
+
+    // center rotate
+    modelMat = m3.translate(modelMat, -centroid[0], -centroid[1]);
+    const theta = -time * 2.0;
+    modelMat = m3.rotate(modelMat, theta);
+    modelMat = m3.translate(modelMat, centroid[0], centroid[1]);
+
+    // translate
+    modelMat = m3.translate(
+      modelMat,
+      Math.sin(time) * 0.5,
+      Math.cos(time) * 0.5
+    );
+
+    gl.uniformMatrix3fv(modelUniformLocation, false, modelMat);
 
     gl.bindVertexArray(vaoInfo.buffer);
     gl.drawArrays(gl.TRIANGLES, 0, vaoInfo.count);
